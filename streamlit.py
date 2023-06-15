@@ -75,7 +75,19 @@ if mode == '浏览':
         "output": display_list[2],
         "test_passed?": display_list[3],
     }
-    display_dict
+
+    st.header("test_passed?")
+    display_dict["test_passed?"]
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.header("solution")
+        st.code(display_dict['solution'])
+    with col2:
+        st.header("input")
+        st.code(display_dict['input'])
+        st.header("output")
+        st.code(display_dict['output'])
 
 # --------------------------------------
 if mode == '更新测试项目文件':
