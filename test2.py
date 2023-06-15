@@ -185,7 +185,7 @@ class DataProcessor:
     def to_TextData(self)-> TextData:
         return TextData(self.save_dict_path, self.list_data)
     
-    def append_line(self, z_index, y_index, x_index, line:list[str])-> None:
+    def append_line(self, z_index, y_index, x_index, line)-> None:
         """
          设置self.list_data对应位置的"solution_text", "input_text", "output_text", "is_passed"
          	 line: 输入的数据，列表长度和self.t_index相同
