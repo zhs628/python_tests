@@ -5,7 +5,9 @@ import os
 from tqdm import tqdm
 import subprocess
 import streamlit as st
-
+import psutil
+import time
+import math
 
 def get_folders(path):
     folders = []
@@ -25,7 +27,7 @@ def load_json(path)-> str:
     return data
 
 def normalize(a: str)-> str:
-    # replace all \r
+    # replace all \r 
     a = a.replace("\r", "")
     # strip trailing whitespace in each line
     # strip multiple \n
@@ -47,6 +49,26 @@ def run_pipe(cmd, input) -> str:
         return "", "TimeoutExpired"
     return stdout, stderr
 
+
+# def cup_sleep():
+#     '''
+#     根据cpu占有率返回应该睡眠的时间
+#     '''
+#     cpu_percent = psutil.cpu_percent(interval=0)
+#     sleep_time = 0
+#     if cpu_percent >= 0.9:
+#         sleep_time = 10
+#     return sleep_time
+
+# def memory_save():
+#     '''
+#     根据内存占用率返回保存间隔
+#     '''
+#     mem_percent = psutil.virtual_memory()[2]
+#     save_num = 50
+#     if mem_percent < 0.9:
+#         save_num = 0
+#     return save_num
 
 class TextData:
     """
@@ -209,7 +231,7 @@ class DataProcessor:
         z_index, y_index, x_index = 0,0,0
         for question_index, question_path in tqdm(list(enumerate(self.questions_path)),  desc=' question ', leave=False):
            
-            if 'leecode' in self.get_url_from_file(question_path):
+            if 'leetcode' in self.get_url_from_file(question_path):
                 continue
             
             if 'input_output.json' not in get_json_names(question_path):
@@ -252,11 +274,30 @@ class DataProcessor:
         # print(json.dumps(self.list_data[135:138], indent=4))
     
     def run_in_streamlit(self)-> None:
+        import streamlit as st
         from stqdm import stqdm
         z_index, y_index, x_index = 0,0,0
+        
+
+        # write_container_1 = st.text(body='')
+        # write_container_2 = st.text(body='')
+        # save_num = memory_save()
+        # write_container_2.write(f'保存间隔: {save_num}')
+        
         for question_index, question_path in stqdm(list(enumerate(self.questions_path)),  desc=' question '):
+            
+            # if question_index // 10 == 0:
+            #     sleep_time = cup_sleep()
+            #     write_container_1.write(f'执行间隔: {sleep_time}s')
+            #     time.sleep(sleep_time)
+            
+            # save_num -= 1
+            # if save_num < 0:
+            #     self.to_TextData().save()
+            #     save_num = memory_save()
+            #     write_container_2.write(f'保存间隔: {save_num}')
            
-            if 'leecode' in self.get_url_from_file(question_path):
+            if 'leetcode' in self.get_url_from_file(question_path):
                 continue
             
             if 'input_output.json' not in get_json_names(question_path):
@@ -282,8 +323,12 @@ class DataProcessor:
                     input_str, output_str = input_output_str
                     input_str, output_str = str(input_str), str(output_str)
                     
+                    if input_str[0] == '[':
+                        continue
+                    
                     self.append_line(z_index, y_index, x_index, [normalize(solution_str), normalize(input_str), normalize(output_str), 'false'])
                     x_index += 1
+                    
                 
                 if x_index == 0:
                     continue
@@ -311,7 +356,14 @@ class Test():
 
 
     def run_in_streamlit(self):
+        import streamlit as st
         from stqdm import stqdm
+        
+        
+        
+        # write_container_1 = st.text(body='')
+        # write_container_2 = st.text(body='')
+        
         
         list_questions = []
         
@@ -320,7 +372,19 @@ class Test():
         passed_num = 0
         accuracy = 0
         
+        # save_num = memory_save()
         for question_index, np_question in stqdm(list(enumerate(self.text_data.np_data)), desc=' question '):
+            
+            # if question_index // 10 == 0:
+            #     sleep_time = int(cup_sleep())
+            #     write_container_1.write(f'cup占用率: {round(psutil.cpu_percent(interval=1), 2)}\t执行间隔: {sleep_time}s')
+            #     time.sleep(sleep_time)
+            
+            # save_num -= 1
+            # if save_num < 0:
+            #     self.to_TextData().save()
+            #     save_num = memory_save()
+            #     write_container_2.write(f'内存占用率: {round(psutil.virtual_memory().percent, 1)}\t保存间隔: {save_num}')
             
             # 转成列表并删除其中值为None的元素
             list_question = np_question.tolist()

@@ -9,14 +9,32 @@ def load_data(path, view_mode):
     
     data = np.load(path, allow_pickle=True)
     
-    filter_obj = {'只看通过的':'true', '只看不通过的':'false', '我都要看':'none'}[view_mode]
+    filter_obj = {'只看通过的':'true', '只看不通过的':'false', '我都要看':None}[view_mode]
 
-    if filter_obj != 'none':
-        filtered_data = np_tolist(data, filter_obj)
-    if filter_obj == 'none':
-        filtered_data = data
+
+    filtered_data = np_tolist(data, filter_obj)
+
+    
+    passed_rate_list = []
+    
+    if view_mode == '我都要看':
+        st.subheader('每个问题的通过率')
+        for question in filtered_data:
+            passed_num = 0
+            all_num = 0
+            for solution in question:
+                for inout in solution:
+                    if inout[3] == 'true':
+                        passed_num += 1
+                    all_num += 1
+            passed_rate_list.append(passed_num/all_num)
+        
+    
+    st.bar_chart(data=passed_rate_list)
     
     return filtered_data
+
+
 
 
 def find_data_npy_files(root_path):
@@ -54,7 +72,7 @@ def np_tolist(np_data, filter_obj):
                         
                 if new_inout == []:
                     continue
-                if new_inout[3] != filter_obj:
+                if new_inout[3] != filter_obj and filter_obj is not None:
                     continue
                 new_solution.append(input_output)
                 
@@ -67,6 +85,10 @@ def np_tolist(np_data, filter_obj):
         new_data.append(new_qusetion)
     
     return new_data
+
+
+
+
 
 mode = st.radio('选择模式', ['浏览', '更新测试项目文件', '开始测试'])
 
@@ -83,6 +105,10 @@ if mode == '浏览':
 
 
     filtered_data = load_data(data_path, view_mode)
+    
+    
+
+    
 
 
 
@@ -141,7 +167,9 @@ if mode == '更新测试项目文件':
     if st.button('开始'):
         data_processor = DataProcessor(base_dict_path=base_dict_path, save_dict_path=save_dict_path)
         data_processor.run_in_streamlit()
+        st.write('保存中')
         data_processor.to_TextData().save()
+        st.write('完毕')
 # --------------------------------------
 if mode == '开始测试':
     
@@ -154,4 +182,6 @@ if mode == '开始测试':
     if st.button('开始'):
         test = Test(save_dict_path=save_dict_path)
         test.run_in_streamlit()
+        st.write('保存中')
         test.text_data.save()
+        st.write('完毕')
